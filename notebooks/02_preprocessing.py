@@ -1,9 +1,20 @@
-# Phase 3: Data Preprocessing & Feature Engineering
+# Phase 3: Data Cleaning & Preprocessing
 
-import pandas as pd
-import numpy as np
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
 import sys
 sys.path.append('../')
-from src.config import DATA_RAW_DIR, DATA_PROCESSED_DIR, TARGET_VARIABLES, TEST_SIZE, RANDOM_STATE
+
+from src.preprocess import run_pipeline
+import pandas as pd
+
+# Run full pipeline
+df = run_pipeline()
+
+# Quick check
+print("\nSample:")
+print(df.head())
+
+print("\nData types:")
+print(df.dtypes)
+
+print("\nMissing values:")
+print(df.isnull().sum()[df.isnull().sum() > 0])
