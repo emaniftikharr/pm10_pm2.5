@@ -1,0 +1,75 @@
+name: AQI Pipeline
+
+on:
+  schedule:
+    - cron: '0 * * * *'    # hourly — data fetch
+    - cron: '0 6 * * *'    # 06:00 UTC daily — retrain
+  workflow_dispatch:        # manual trigger from GitHub UI
+
+jobs:
+  # ── Job 1: Hourly Data Fetch ─────────────────────────────────────────────
+  fetch-data:
+    name: Fetch Latest AQI Data
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 * * * *' || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install requests pandas pytz python-dotenv
+
+      - name: Fetch data
+        run: python scripts/fetch_data.py
+
+      - name: Run feature pipeline
+        run: python scripts/feature_pipeline.py
+
+      - name: Commit updated data
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "data: hourly AQI update [${{ github.run_number }}]"
+          file_pattern: "data/raw/*.csv data/processed/*.csv data/*.csv"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
+
+  # ── Job 2: Daily Model Retrain ───────────────────────────────────────────
+  retrain:
+    name: Daily Model Retrain
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 6 * * *' || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install pandas numpy scikit-learn xgboost joblib
+
+      - name: Run feature pipeline (ensure latest features)
+        run: python scripts/feature_pipeline.py
+
+      - name: Retrain models
+        run: python scripts/retrain.py
+
+      - name: Commit updated models and logs
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "models: daily retrain [${{ github.run_number }}]"
+          file_pattern: "models/xgb_best_*.pkl reports/retrain_log.csv"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
