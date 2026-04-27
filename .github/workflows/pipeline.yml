@@ -11,7 +11,6 @@ jobs:
   fetch-data:
     name: Fetch Latest AQI Data
     runs-on: ubuntu-latest
-    if: github.event.schedule == '0 * * * *' || github.event_name == 'workflow_dispatch'
 
     steps:
       - name: Checkout repo
@@ -24,7 +23,10 @@ jobs:
           cache: 'pip'
 
       - name: Install dependencies
-        run: pip install requests pandas pytz python-dotenv
+        run: pip install requests pandas pytz python-dotenv scikit-learn joblib xgboost
+
+      - name: Create data directories
+        run: mkdir -p data/raw data/processed models reports
 
       - name: Fetch data
         run: python scripts/fetch_data.py
@@ -44,7 +46,7 @@ jobs:
   retrain:
     name: Daily Model Retrain
     runs-on: ubuntu-latest
-    if: github.event.schedule == '0 6 * * *' || github.event_name == 'workflow_dispatch'
+    needs: fetch-data
 
     steps:
       - name: Checkout repo
@@ -57,10 +59,15 @@ jobs:
           cache: 'pip'
 
       - name: Install dependencies
-        run: |
-          pip install pandas numpy scikit-learn xgboost joblib
+        run: pip install pandas numpy scikit-learn xgboost joblib pytz requests
 
-      - name: Run feature pipeline (ensure latest features)
+      - name: Create data directories
+        run: mkdir -p data/raw data/processed models reports
+
+      - name: Fetch fresh data
+        run: python scripts/fetch_data.py
+
+      - name: Run feature pipeline
         run: python scripts/feature_pipeline.py
 
       - name: Retrain models

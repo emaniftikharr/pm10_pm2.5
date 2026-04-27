@@ -5,8 +5,10 @@ __pycache__/
 venv/
 .venv/
 env/
-data/raw/*
-data/processed/*
+data/raw/*.parquet
+data/processed/train.csv
+data/processed/val.csv
+data/processed/test.csv
 # Track best models but ignore versioned snapshots
 models/xgb_*_2*.pkl
 models/rf_*_2*.pkl
