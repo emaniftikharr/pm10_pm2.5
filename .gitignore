@@ -7,7 +7,12 @@ venv/
 env/
 data/raw/*
 data/processed/*
-models/*.pkl
-models/*.joblib
+# Track best models but ignore versioned snapshots
+models/xgb_*_2*.pkl
+models/rf_*_2*.pkl
+!models/xgb_best_*.pkl
+!models/rf_best_*.pkl
+!models/scaler_*.pkl
+!models/feature_columns.pkl
 .ipynb_checkpoints/
 *.DS_Store
