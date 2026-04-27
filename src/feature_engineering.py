@@ -122,20 +122,11 @@ def split_data(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFra
     max_year = df["date"].dt.year.max()
     print(f"    Available range: {min_year} → {max_year}")
 
-    if max_year >= 2024:
-        train = df[df["date"].dt.year <= 2022]
-        val   = df[df["date"].dt.year == 2023]
-        test  = df[df["date"].dt.year == 2024]
-    elif max_year >= 2025:
-        train = df[df["date"] < "2025-10-01"]
-        val   = df[(df["date"] >= "2025-10-01") & (df["date"] < "2026-01-01")]
-        test  = df[df["date"] >= "2026-01-01"]
-    else:
-        # Fallback: 70/15/15 time split
-        n     = len(df)
-        train = df.iloc[:int(n * 0.70)]
-        val   = df.iloc[int(n * 0.70):int(n * 0.85)]
-        test  = df.iloc[int(n * 0.85):]
+    # Always use 70/15/15 time-aware split — preserves temporal order
+    n     = len(df)
+    train = df.iloc[:int(n * 0.70)]
+    val   = df.iloc[int(n * 0.70):int(n * 0.85)]
+    test  = df.iloc[int(n * 0.85):]
 
     print(f"    Train : {len(train)} rows  ({train['date'].min().date()} → {train['date'].max().date()})")
     print(f"    Val   : {len(val)} rows  ({val['date'].min().date()} → {val['date'].max().date()})" if not val.empty else "    Val   : 0 rows")
