@@ -23,13 +23,16 @@ jobs:
           cache: 'pip'
 
       - name: Install dependencies
-        run: pip install requests pandas pytz python-dotenv scikit-learn joblib xgboost
+        run: pip install requests pandas pytz python-dotenv scikit-learn joblib xgboost numpy
 
       - name: Create data directories
         run: mkdir -p data/raw data/processed models reports
 
       - name: Fetch data
         run: python scripts/fetch_data.py
+
+      - name: Check raw file exists
+        run: ls -lh data/raw/
 
       - name: Run feature pipeline
         run: python scripts/feature_pipeline.py

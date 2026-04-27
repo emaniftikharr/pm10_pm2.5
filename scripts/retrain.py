@@ -38,10 +38,8 @@ XGB_PARAMS = {
 
 def load_feature_store() -> pd.DataFrame:
     if not os.path.exists(FEATURE_STORE):
-        raise FileNotFoundError(
-            f"Feature store not found: {FEATURE_STORE}\n"
-            "Run scripts/feature_pipeline.py first."
-        )
+        print(f"Feature store not found: {FEATURE_STORE} — run feature_pipeline.py first.")
+        sys.exit(0)
     df = pd.read_csv(FEATURE_STORE, parse_dates=["date"])
     df = df.sort_values("date").reset_index(drop=True)
     print(f"Loaded feature store: {df.shape}")

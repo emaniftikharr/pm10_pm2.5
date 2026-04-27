@@ -28,7 +28,8 @@ POLLUTANT_COLS = ["pm2_5", "pm10", "carbon_monoxide",
 
 def load_raw() -> pd.DataFrame:
     if not os.path.exists(RAW_FILE):
-        raise FileNotFoundError(f"Raw file not found: {RAW_FILE}")
+        print(f"Raw file not found: {RAW_FILE} — run fetch_data.py first.")
+        sys.exit(0)
     df = pd.read_csv(RAW_FILE, parse_dates=["time"])
     df = df.sort_values("time").reset_index(drop=True)
     print(f"Loaded raw: {df.shape}")
